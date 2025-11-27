@@ -1,0 +1,89 @@
+package com.klef.fsd.sdp.hotelhub.controller;
+
+import com.klef.fsd.sdp.hotelhub.model.Booking;
+import com.klef.fsd.sdp.hotelhub.model.Cab;       // 👈 Import Cab
+import com.klef.fsd.sdp.hotelhub.model.Customer;
+import com.klef.fsd.sdp.hotelhub.model.FoodItem;  // 👈 Import FoodItem
+import com.klef.fsd.sdp.hotelhub.model.Room;
+import com.klef.fsd.sdp.hotelhub.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/customer")
+@CrossOrigin("*")
+public class CustomerController {
+
+    @Autowired
+    private CustomerService customerService;
+
+    // --- Authentication & Registration ---
+    @PostMapping("/register")
+    public ResponseEntity<String> registerCustomer(@RequestBody Customer customer) {
+        try {
+            customerService.registerCustomer(customer);
+            return ResponseEntity.ok("Customer registered successfully!");
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Username or Email already exists.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred during registration.");
+        }
+    }
+
+    @PostMapping("/checkcustomerlogin")
+    public ResponseEntity<?> checkCustomerLogin(@RequestBody Customer customer) {
+        Customer c = customerService.checkCustomerLogin(customer.getUsername(), customer.getPassword());
+        if (c != null) {
+            return ResponseEntity.ok(c);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials");
+        }
+    }
+    
+    // --- Profile Management ---
+    @PostMapping("/profile/update")
+    public ResponseEntity<Customer> updateProfile(@RequestBody Customer customer) {
+        Customer updatedCustomer = customerService.updateProfile(customer);
+        if (updatedCustomer != null) {
+            return ResponseEntity.ok(updatedCustomer);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    // --- Room Booking ---
+    @PostMapping("/bookroom")
+    public Booking bookRoom(@RequestBody Booking booking){
+        return customerService.bookRoom(booking);
+    }
+    
+    @PostMapping("/updatebooking")
+    public Booking updateBooking(@RequestBody Booking booking){
+        return customerService.updateBooking(booking);
+    }
+    
+    @GetMapping("/viewmybookings/{customerId}")
+    public List<Booking> viewMyBookings(@PathVariable int customerId){
+        return customerService.viewMyBookings(customerId);
+    }
+
+    @GetMapping("/rooms")
+    public List<Room> viewAllAvailableRooms() {
+        return customerService.viewAllAvailableRooms();
+    }
+
+    // --- 👇 NEW: Food & Cab Viewing ---
+    @GetMapping("/viewfoodmenu")
+    public List<FoodItem> viewFoodMenu() {
+        // Note: Ensure you added viewAllFoodItems to CustomerService implementation
+        return ((com.klef.fsd.sdp.hotelhub.service.CustomerServiceImpl)customerService).viewAllFoodItems();
+    }
+
+    @GetMapping("/viewcabs")
+    public List<Cab> viewCabs() {
+        return ((com.klef.fsd.sdp.hotelhub.service.CustomerServiceImpl)customerService).viewAvailableCabs();
+    }
+}

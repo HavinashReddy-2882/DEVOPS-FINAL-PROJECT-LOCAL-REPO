@@ -1,0 +1,27 @@
+package com.klef.fsd.sdp.hotelhub.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "cab_table")
+public class Cab {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    private String carModel;
+    private String cabType; // 4-Seater etc
+    private String driverName;
+    private double pricePerKm;
+    private boolean available;
+
+    @ManyToOne @JoinColumn(name = "manager_id")
+    private Manager manager;
+
+    // Getters and Setters
+    public int getId() { return id; } public void setId(int id) { this.id = id; }
+    public String getCarModel() { return carModel; } public void setCarModel(String carModel) { this.carModel = carModel; }
+    public String getCabType() { return cabType; } public void setCabType(String cabType) { this.cabType = cabType; }
+    public String getDriverName() { return driverName; } public void setDriverName(String driverName) { this.driverName = driverName; }
+    public double getPricePerKm() { return pricePerKm; } public void setPricePerKm(double pricePerKm) { this.pricePerKm = pricePerKm; }
+    public boolean isAvailable() { return available; } public void setAvailable(boolean available) { this.available = available; }
+    public Manager getManager() { return manager; } public void setManager(Manager manager) { this.manager = manager; }
+}

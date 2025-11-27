@@ -1,0 +1,5 @@
+package com.klef.fsd.sdp.hotelhub.model;
+
+public class LoginResponse {
+
+}

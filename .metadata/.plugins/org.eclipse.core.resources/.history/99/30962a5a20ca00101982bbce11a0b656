@@ -1,0 +1,98 @@
+package com.klef.fsd.sdp.hotelhub.service;
+
+import com.klef.fsd.sdp.hotelhub.model.Booking;
+import com.klef.fsd.sdp.hotelhub.model.Cab;
+import com.klef.fsd.sdp.hotelhub.model.FoodItem;
+import com.klef.fsd.sdp.hotelhub.model.Manager;
+import com.klef.fsd.sdp.hotelhub.model.Room;
+import com.klef.fsd.sdp.hotelhub.repository.BookingRepository;
+import com.klef.fsd.sdp.hotelhub.repository.CabRepository;
+import com.klef.fsd.sdp.hotelhub.repository.FoodItemRepository;
+import com.klef.fsd.sdp.hotelhub.repository.ManagerRepository;
+import com.klef.fsd.sdp.hotelhub.repository.RoomRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class ManagerServiceImpl implements ManagerService {
+
+    @Autowired private ManagerRepository managerRepository;
+    @Autowired private RoomRepository roomRepository;
+    @Autowired private BookingRepository bookingRepository;
+    @Autowired private FoodItemRepository foodItemRepository;
+    @Autowired private CabRepository cabRepository;
+
+    // --- Manager Auth ---
+    @Override
+    public Manager checkManagerLogin(String username, String password) {
+        return managerRepository.findByUsernameAndPassword(username, password);
+    }
+
+    // --- Room Management ---
+    @Override
+    public String addRoom(Room room) {
+        roomRepository.save(room);
+        return "Room added successfully.";
+    }
+
+    @Override
+    public String updateRoom(Room room) {
+        if(roomRepository.existsById(room.getId())){
+            roomRepository.save(room);
+            return "Room updated successfully.";
+        }
+        return "Room not found.";
+    }
+
+    @Override
+    public String deleteRoom(int roomId) {
+        if (roomRepository.existsById(roomId)) {
+            roomRepository.deleteById(roomId);
+            return "Room deleted successfully.";
+        }
+        return "Room not found.";
+    }
+
+    @Override
+    public List<Room> viewAllRoomsByManager(int managerId) {
+        return roomRepository.findByManagerId(managerId);
+    }
+
+    @Override
+    public Room getRoomById(int roomId) {
+        return roomRepository.findById(roomId).orElse(null);
+    }
+
+    // --- Booking Management ---
+    @Override
+    public List<Booking> viewBookingsForManager(int managerId) {
+        return bookingRepository.findByManagerId(managerId);
+    }
+
+    // --- Food Menu Management (New) ---
+    public FoodItem addFoodItem(FoodItem foodItem) {
+        return foodItemRepository.save(foodItem);
+    }
+
+    public List<FoodItem> viewFoodMenu(int managerId) {
+        return foodItemRepository.findByManagerId(managerId);
+    }
+
+    public void deleteFoodItem(int id) {
+        foodItemRepository.deleteById(id);
+    }
+
+    // --- Cab Management (New) ---
+    public Cab addCab(Cab cab) {
+        return cabRepository.save(cab);
+    }
+
+    public List<Cab> viewMyCabs(int managerId) {
+        return cabRepository.findByManagerId(managerId);
+    }
+
+    public void deleteCab(int id) {
+        cabRepository.deleteById(id);
+    }
+}

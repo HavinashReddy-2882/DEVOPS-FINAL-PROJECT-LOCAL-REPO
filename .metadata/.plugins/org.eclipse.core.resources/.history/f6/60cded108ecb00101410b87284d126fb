@@ -1,0 +1,31 @@
+package com.klef.fsd.sdp.hotelhub.controller;
+
+import com.klef.fsd.sdp.hotelhub.model.*;
+import com.klef.fsd.sdp.hotelhub.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController @RequestMapping("/customer") @CrossOrigin("*")
+public class CustomerController {
+    @Autowired private CustomerService customerService;
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestBody Customer c) {
+        try { customerService.registerCustomer(c); return ResponseEntity.ok("Registered!"); }
+        catch (Exception e) { return ResponseEntity.status(HttpStatus.CONFLICT).body("Error registering."); }
+    }
+    
+    @PostMapping("/bookroom") public Booking bookRoom(@RequestBody Booking b) { return customerService.bookRoom(b); }
+    @PostMapping("/updatebooking") public Booking updateBooking(@RequestBody Booking b) { return customerService.updateBooking(b); }
+    @GetMapping("/viewmybookings/{id}") public List<Booking> viewBookings(@PathVariable int id) { return customerService.viewMyBookings(id); }
+    @GetMapping("/rooms") public List<Room> viewRooms() { return customerService.viewAllAvailableRooms(); }
+    
+    @PostMapping("/profile/update") public ResponseEntity<Customer> updateProfile(@RequestBody Customer c) {
+        return ResponseEntity.ok(customerService.updateProfile(c));
+    }
+
+    @GetMapping("/viewfoodmenu") public List<FoodItem> viewFood() { return customerService.viewAllFoodItems(); }
+    @GetMapping("/viewcabs") public List<Cab> viewCabs() { return customerService.viewAvailableCabs(); }
+}

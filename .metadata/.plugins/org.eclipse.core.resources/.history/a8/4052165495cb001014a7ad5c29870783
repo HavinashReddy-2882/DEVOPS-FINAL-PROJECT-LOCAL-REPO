@@ -1,0 +1,108 @@
+package com.klef.fsd.sdp.hotelhub.service;
+
+import com.klef.fsd.sdp.hotelhub.model.*;
+import com.klef.fsd.sdp.hotelhub.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ManagerServiceImpl implements ManagerService {
+
+    @Autowired private ManagerRepository managerRepository;
+    @Autowired private RoomRepository roomRepository;
+    @Autowired private BookingRepository bookingRepository;
+    @Autowired private FoodItemRepository foodItemRepository;
+    @Autowired private CabRepository cabRepository;
+    @Autowired private CabBookingRepository cabBookingRepository;
+
+    // --- Authentication ---
+    @Override
+    public Manager checkManagerLogin(String username, String password) {
+        return managerRepository.findByUsernameAndPassword(username, password);
+    }
+
+    // --- Room Management ---
+    @Override 
+    public String addRoom(Room room) { 
+        // Logic to safely link the room to the manager
+        if (room.getManager() != null) {
+            int mid = room.getManager().getId();
+            Optional<Manager> m = managerRepository.findById(mid);
+            if (m.isPresent()) {
+                room.setManager(m.get()); // Attach the persistent Manager object
+                roomRepository.save(room); 
+                return "Room added successfully."; 
+            }
+        }
+        throw new RuntimeException("Manager not found. Cannot add room.");
+    }
+
+    @Override 
+    public String updateRoom(Room room) { 
+        if (room.getManager() != null) {
+            int mid = room.getManager().getId();
+            Optional<Manager> m = managerRepository.findById(mid);
+            if (m.isPresent()) {
+                room.setManager(m.get());
+                roomRepository.save(room); 
+                return "Room updated successfully."; 
+            }
+        }
+        throw new RuntimeException("Manager not found. Cannot update room.");
+    }
+
+    @Override public String deleteRoom(int id) { roomRepository.deleteById(id); return "Deleted."; }
+    @Override public List<Room> viewAllRoomsByManager(int id) { return roomRepository.findByManagerId(id); }
+    @Override public Room getRoomById(int id) { return roomRepository.findById(id).orElse(null); }
+    @Override public List<Booking> viewBookingsForManager(int id) { return bookingRepository.findByManagerId(id); }
+
+    // --- Food Management ---
+    @Override
+    public FoodItem addFoodItem(FoodItem item) {
+        if(item.getManager() != null) {
+             Optional<Manager> m = managerRepository.findById(item.getManager().getId());
+             if(m.isPresent()) {
+                 item.setManager(m.get());
+                 return foodItemRepository.save(item);
+             }
+        }
+        throw new RuntimeException("Manager not found. Cannot add food item.");
+    }
+    
+    @Override public List<FoodItem> viewFoodMenu(int mid) { return foodItemRepository.findByManagerId(mid); }
+    @Override public void deleteFoodItem(int id) { foodItemRepository.deleteById(id); }
+
+    // --- Cab Management ---
+    @Override
+    public Cab addCab(Cab cab) {
+        if(cab.getManager() != null) {
+             Optional<Manager> m = managerRepository.findById(cab.getManager().getId());
+             if(m.isPresent()) {
+                 cab.setManager(m.get());
+                 return cabRepository.save(cab);
+             }
+        }
+        throw new RuntimeException("Manager not found. Cannot add cab.");
+    }
+    
+    @Override public List<Cab> viewMyCabs(int mid) { return cabRepository.findByManagerId(mid); }
+    @Override public void deleteCab(int id) { cabRepository.deleteById(id); }
+
+    // --- Cab Requests ---
+    // These methods might not be in the interface yet, but required for the controller logic
+    public List<CabBooking> viewCabRequests(int managerId) {
+        return cabBookingRepository.findByManagerId(managerId);
+    }
+
+    public String updateCabStatus(int bookingId, String status) {
+        CabBooking cb = cabBookingRepository.findById(bookingId).orElse(null);
+        if(cb != null) {
+            cb.setStatus(status);
+            cabBookingRepository.save(cb);
+            return "Status Updated";
+        }
+        return "Booking Not Found";
+    }
+}

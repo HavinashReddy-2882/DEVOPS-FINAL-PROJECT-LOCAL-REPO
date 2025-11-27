@@ -1,0 +1,41 @@
+package com.klef.fsd.sdp.hotelhub.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "cab_table")
+public class Cab {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+    @Column(nullable = false)
+    private String carModel; // e.g., Toyota Innova
+    @Column(nullable = false)
+    private String cabType; // e.g., 3-Seater, 5-Seater
+    @Column(nullable = false)
+    private String driverName;
+    @Column(nullable = false)
+    private double pricePerKm;
+    @Column(nullable = false)
+    private boolean available;
+
+    @ManyToOne
+    @JoinColumn(name = "manager_id", nullable = false)
+    private Manager manager;
+
+    // Getters and Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public String getCarModel() { return carModel; }
+    public void setCarModel(String carModel) { this.carModel = carModel; }
+    public String getCabType() { return cabType; }
+    public void setCabType(String cabType) { this.cabType = cabType; }
+    public String getDriverName() { return driverName; }
+    public void setDriverName(String driverName) { this.driverName = driverName; }
+    public double getPricePerKm() { return pricePerKm; }
+    public void setPricePerKm(double pricePerKm) { this.pricePerKm = pricePerKm; }
+    public boolean isAvailable() { return available; }
+    public void setAvailable(boolean available) { this.available = available; }
+    public Manager getManager() { return manager; }
+    public void setManager(Manager manager) { this.manager = manager; }
+}
